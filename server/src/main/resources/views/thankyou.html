@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width'>
+    <title>Thank you!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+          crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/thankyou.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <button class="navbar-toggler" type="button"
+            data-toggle="collapse"
+            data-bs-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+                <a class="nav-link" href="https://github.com/emansih/photuris-iii-ocr"><b>Github Page</b></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://photurisiii-ocr.hisname.xyz/tos"><b>Terms of Service</b></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="https://photurisiii-ocr.hisname.xyz/privacy"><b>Privacy</b></a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <p class="text-center">Thank you</p>
+    <p class="text-center fs-6">Thank you for purchasing this service, feel free to contact me for any requests</p>
+
+    <table class="body-wrap">
+        <tbody>
+        <tr>
+            <td></td>
+            <td class="container" width="600">
+                <div class="content">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0">
+                        <tbody><tr>
+                            <td class="content-wrap aligncenter">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tbody>
+                                    <tr>
+                                        <td class="content-block">
+                                            <table class="invoice">
+                                                <tbody><tr>
+                                                    <td>
+                                                        <p th:text="${customerName}"></p>
+                                                        <br th:text="'Invoice #' + ${invoiceId}">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <table class="invoice-items" cellpadding="0" cellspacing="0">
+                                                            <tbody><tr>
+                                                                <td>Photuris III OCR</td>
+                                                                <td class="alignright"
+                                                                    th:text="${currency} + ' ' + ${amount}"></td>
+                                                            </tr>
+                                                            </tbody></table>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="content-block">
+                                            <a th:href="${receiptUrl}">View PDF Version</a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody></table>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+
+<footer class="footer">
+    <hr />
+    <div class="container text-center">
+        <h6>Copyright &#169 2021 ASDF Dev Pte Ltd</h6>
+        <p>UEN: 202100645E</p>
+    </div>
+</footer>
+
+</html>
+      

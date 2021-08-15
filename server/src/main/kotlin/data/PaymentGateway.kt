@@ -96,8 +96,13 @@ class PaymentGateway {
             .setMode(CheckoutSession.Mode.SUBSCRIPTION)
             .setCustomer(customerId)
             .setClientReferenceId(firebaseId)
-            .setSuccessUrl("https://example.com/success")
-            .setCancelUrl("https://example.com/cancel")
+            .setSuccessUrl(Constants.APP_URL + "/stripe/thankyou?customer=$customerId")
+            .setCancelUrl(Constants.APP_URL + "/cancel")
+            .setSubscriptionData(CheckoutSession
+                .SubscriptionData
+                .builder()
+                .setTrialPeriodDays(2)
+                .build())
             .addLineItem(CheckoutSession.LineItem.Builder()
                 .setQuantity(1L)
                 .setPrice(createProduct(customerId + "_product", currency, amount, 6))
@@ -129,8 +134,8 @@ class PaymentGateway {
             .setMode(CheckoutSession.Mode.PAYMENT)
             .setCustomer(customerId)
             .setClientReferenceId(firebaseId)
-            .setSuccessUrl("https://example.com/success")
-            .setCancelUrl("https://example.com/cancel")
+            .setSuccessUrl(Constants.APP_URL + "/stripe/thankyou?customer=$customerId")
+            .setCancelUrl(Constants.APP_URL + "/cancel")
             .addLineItem(
                 CheckoutSession.LineItem.builder()
                     .setQuantity(1L)

@@ -23,6 +23,7 @@ import controllers.stripe.Webhook as StripeWebhook
 import controllers.google.Webhook as GoogleWebhook
 import io.javalin.Javalin
 import io.javalin.core.JavalinConfig
+import io.javalin.http.staticfiles.Location
 import utils.GoogleExtension
 
 class App
@@ -47,6 +48,8 @@ fun main(){
 	}
     val app = Javalin.create{ obj: JavalinConfig ->
         obj.enableDevLogging()
+        obj.addStaticFiles("/css", Location.CLASSPATH)
+        obj.showJavalinBanner = false
     }.start(8181)
     configureRoutes(app)
     try {
@@ -63,6 +66,7 @@ private fun configureRoutes(app: Javalin) {
     app.get("/privacy", PrivacyController())
     app.get("/tos", TosController())
     app.get("/healthCheck", HealthCheck())
+    app.get("/cancel", PurchaseCancelController())
 
     app.post("/api/v1/cancel", CancelSubscription())
 
@@ -71,6 +75,7 @@ private fun configureRoutes(app: Javalin) {
     app.post("/api/v1/stripe/webhook", StripeWebhook())
     app.post("/api/v1/stripe/purchase", PurchaseGoods())
     app.post("/api/v1/stripe/hosted_page", HostedWebpage())
+    app.get("/stripe/thankyou", PurchaseSuccessController())
 
     app.post("/api/v1/google/webhook", GoogleWebhook())
 

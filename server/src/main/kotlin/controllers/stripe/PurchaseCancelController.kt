@@ -15,17 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-class Constants private constructor() {
 
-    companion object {
-        val AZUREKEY: String? = System.getenv("AZUREKEY")
-        val AZUREURL: String? = System.getenv("AZUREURL")
-        val STRIPE_SECRET_KEY: String? = System.getenv("STRIPE_SECRET_KEY")
-        val STORAGE_BUCKET: String? = System.getenv("STORAGE_BUCKET")
-		val STRIPE_WEB_HOOK_KEY: String? = System.getenv("STRIPE_WEB_HOOK_KEY")
-        val APP_URL: String? = System.getenv("APP_URL")
-        const val PACKAGE_NAME = "xyz.hisname.fireflyiii.ocr"
-        const val TEST_EMAIL = "RandomEmail@gmail.com"
-        const val TEST_FIREBASE_ID = "some_random_id"
+package controllers.stripe
+
+import io.javalin.http.Context
+import io.javalin.http.Handler
+
+class PurchaseCancelController: Handler {
+
+    override fun handle(context: Context) {
+        context.render("/views/cancel.html")
     }
 }
