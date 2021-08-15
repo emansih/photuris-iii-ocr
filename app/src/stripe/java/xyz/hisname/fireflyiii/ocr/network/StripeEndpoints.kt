@@ -21,6 +21,7 @@ import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
+import xyz.hisname.fireflyiii.ocr.models.HttpResponse
 import xyz.hisname.fireflyiii.ocr.models.ProductDetails
 import xyz.hisname.fireflyiii.ocr.models.StripeResponse
 
@@ -48,4 +49,10 @@ interface StripeEndpoints {
     @FormUrlEncoded
     @POST("/api/v1/price")
     suspend fun getPrice(@Field("market") market: String = "stripe"): Response<ProductDetails>
+
+
+    @FormUrlEncoded
+    @POST("/api/v1/stripe/hosted_page")
+    suspend fun getHostedPage(@Field("currencyCode") currencyCode: String,
+                              @Field("isRecurring") isRecurring: Boolean): Response<HttpResponse>
 }

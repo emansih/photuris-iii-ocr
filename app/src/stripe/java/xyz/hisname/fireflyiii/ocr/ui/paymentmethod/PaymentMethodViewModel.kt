@@ -100,6 +100,28 @@ class PaymentMethodViewModel(application: Application): BaseViewModel(applicatio
         return clientSecret
     }
 
+    fun getHostedWebpage(currencyCode: String, isRecurring: Boolean): LiveData<String>{
+        val webpageUrl = MutableLiveData<String>()
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { coroutineContext, throwable ->
+            isLoading.postValue(false)
+        }){
+            isLoading.postValue(true)
+            val serverResponse = stripeEndpoint.getHostedPage(currencyCode, isRecurring)
+            val responseBody = serverResponse.body()
+            if(serverResponse.isSuccessful && responseBody != null){
+                webpageUrl.postValue(responseBody.response.toString())
+            } else {
+                if(responseBody == null){
+                    httpMessage.postValue("There was an issue communicating with the server.")
+                } else {
+                    httpMessage.postValue(responseBody.response.toString())
+                }
+            }
+            isLoading.postValue(false)
+        }
+        return webpageUrl
+    }
+
     fun createCustomerSession(): LiveData<Boolean> {
         val isSuccessful = MutableLiveData<Boolean>()
         // Request key once. Reduce load on my server

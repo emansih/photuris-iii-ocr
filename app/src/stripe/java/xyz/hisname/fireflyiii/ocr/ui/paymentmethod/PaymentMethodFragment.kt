@@ -27,6 +27,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -91,7 +92,6 @@ class PaymentMethodFragment: BottomSheetDialogFragment() {
         val paymentMethodArray = arrayListOf(
             PaymentModel("Credit Card",
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_credit_card), 0))
-
         if(!isRecurring){
             if (currencyCode.contentEquals("CNY") || currencyCode.contentEquals("SGD")){
                 paymentMethodArray.add(PaymentModel("Alipay",
@@ -129,6 +129,8 @@ class PaymentMethodFragment: BottomSheetDialogFragment() {
         paymentViewModel.httpMessage.observe(viewLifecycleOwner){ message ->
             toast(message)
         }
+        paymentMethodArray.add(PaymentModel("Pay via Web Browser",
+            ContextCompat.getDrawable(requireContext(), R.drawable.ic_credit_card), 8))
     }
 
     private fun getUserData(cardId: Long){
@@ -179,10 +181,21 @@ class PaymentMethodFragment: BottomSheetDialogFragment() {
                     5L -> { giroPay(name, email) }
                     6L -> { idealPayment(name, email) }
                     7L -> { epsPayment(name, email) }
+                    8L -> { webBrowser() }
                 }
             } else {
                 toast("There was an issue setting up payment")
                 dismiss()
+            }
+        }
+    }
+
+    private fun webBrowser(){
+        paymentViewModel.getHostedWebpage(currencyCode, isRecurring).observe(viewLifecycleOwner){ url ->
+            if(url.isNotBlank()){
+                val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
+                browserIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                requireContext().startActivity(browserIntent)
             }
         }
     }
