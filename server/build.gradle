@@ -1,0 +1,60 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+def serverVersion = "1.0.0"
+
+dependencies {
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    implementation "org.apache.pdfbox:pdfbox-tools:2.0.24"
+    implementation "org.apache.pdfbox:pdfbox:2.0.24"
+
+    implementation "org.thymeleaf:thymeleaf:3.0.11.RELEASE"
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-moshi:2.9.0'
+
+    implementation "com.azure:azure-ai-formrecognizer:3.1.2"
+
+    implementation 'com.google.firebase:firebase-admin:8.0.0'
+
+    implementation 'io.javalin:javalin:3.13.10'
+    implementation 'org.slf4j:slf4j-simple:1.7.32'
+    implementation 'com.maxmind.geoip2:geoip2:2.15.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1'
+
+    implementation "com.stripe:stripe-java:20.68.0"
+
+    implementation "com.google.api-client:google-api-client:1.32.1"
+    implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev142-1.25.0'
+    implementation 'com.google.auth:google-auth-library-oauth2-http:0.27.0'
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.0"
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+application {
+    mainClass = 'AppKt'
+}
+
+shadowJar {
+    mainClassName = 'AppKt'
+    archiveFileName = "photurisiii-ocr-${serverVersion}.jar"
+}
+
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}

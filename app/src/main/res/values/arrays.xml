@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <array name="idea_banks_entries">
+        <item>
+            ABN Amro
+        </item>
+        <item>
+            ASN Bank
+        </item>
+        <item>
+            bunq B.V
+        </item>
+        <item>
+            Handelsbanken
+        </item>
+        <item>
+            ING Bank
+        </item>
+        <item>
+            Knab
+        </item>
+        <item>
+            Moneyou
+        </item>
+        <item>
+            Rabobank
+        </item>
+        <item>
+            RegioBank
+        </item>
+        <item>
+            Revolut
+        </item>
+        <item>
+            SNS Bank
+        </item>
+        <item>
+            Triodos Bank
+        </item>
+        <item>
+            Van Lanschot
+        </item>
+    </array>
+
+</resources>

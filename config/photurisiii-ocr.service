@@ -1,0 +1,16 @@
+[Unit]
+After=network.service
+Description="Photuris IIII OCR Server"
+Wants=network-online.target systemd-networkd-wait-online.service
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+ExecStart=/usr/bin/java -jar /bin/photurisiii-ocr.jar
+
+
+
+[Install]
+WantedBy=multi-user.target

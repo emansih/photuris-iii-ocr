@@ -1,0 +1,4 @@
+include ':server'
+include ':app'
+
+rootProject.name = "Photuris III OCR"
