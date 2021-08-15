@@ -22,6 +22,7 @@ import controllers.stripe.*
 import controllers.stripe.Webhook as StripeWebhook
 import controllers.google.Webhook as GoogleWebhook
 import io.javalin.Javalin
+import io.javalin.core.JavalinConfig
 import utils.GoogleExtension
 
 class App
@@ -44,7 +45,9 @@ fun main(){
 	if(Constants.STORAGE_BUCKET.isNullOrBlank()){
 		throw Exception("Storage Bucket URL not found!")
 	}
-    val app = Javalin.create().start(8181)
+    val app = Javalin.create{ obj: JavalinConfig ->
+        obj.enableDevLogging()
+    }.start(8181)
     configureRoutes(app)
     try {
         GoogleExtension.getFirebaseCredentials()
@@ -63,11 +66,11 @@ private fun configureRoutes(app: Javalin) {
 
     app.post("/api/v1/cancel", CancelSubscription())
 
-
     app.post("/api/v1/price", GetPriceController())
     app.post("/api/v1/stripe/createKey", CreateEphemeralKey())
     app.post("/api/v1/stripe/webhook", StripeWebhook())
     app.post("/api/v1/stripe/purchase", PurchaseGoods())
+    app.post("/api/v1/stripe/hosted_page", HostedWebpage())
 
     app.post("/api/v1/google/webhook", GoogleWebhook())
 

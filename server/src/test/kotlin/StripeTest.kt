@@ -18,7 +18,7 @@
 
 import com.stripe.Stripe
 import com.stripe.model.*
-import network.StripeUtils
+import data.PaymentGateway
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.params.ParameterizedTest
@@ -28,7 +28,7 @@ import java.util.*
 class StripeTest {
 
     private lateinit var customer: Customer
-    private val stripeUtils = StripeUtils()
+    private val stripeUtils = PaymentGateway()
     private val couponCode = UUID.randomUUID().toString().substring(0, 6)
 
     companion object {
@@ -40,7 +40,7 @@ class StripeTest {
 
         @AfterAll
         fun tearDown(){
-            StripeUtils().deleteCustomerByEmail(Constants.TEST_EMAIL)
+            PaymentGateway().deleteCustomerByEmail(Constants.TEST_EMAIL)
         }
     }
 

@@ -21,7 +21,7 @@ package controllers
 import com.google.firebase.auth.FirebaseAuth
 import data.Firestore
 import io.javalin.http.Context
-import network.StripeUtils
+import data.PaymentGateway
 import utils.GoogleExtension
 import utils.isUserFromGooglePlay
 import utils.isUserFromStripe
@@ -55,7 +55,7 @@ class CancelSubscription: BaseHandler() {
     }
 
     private fun unsubscribeStripe(token: String){
-        val stripe = StripeUtils()
+        val stripe = PaymentGateway()
         stripe.unSubscribe(token)
     }
 

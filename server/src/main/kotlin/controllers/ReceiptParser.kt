@@ -25,7 +25,7 @@ import com.google.firebase.cloud.StorageClient
 import data.Firestore
 import io.javalin.http.Context
 import models.ReceiptData
-import network.Microsoft
+import data.Microsoft
 import utils.FileUtils
 import utils.isImage
 import utils.isPdf

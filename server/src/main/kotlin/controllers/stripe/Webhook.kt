@@ -20,7 +20,9 @@ package controllers.stripe
 
 import com.google.firebase.auth.FirebaseAuth
 import com.stripe.model.*
+import com.stripe.model.checkout.Session
 import com.stripe.net.Webhook
+import com.stripe.param.ChargeListParams
 import controllers.BaseHandler
 import data.Firestore
 import io.javalin.http.Context
@@ -69,13 +71,41 @@ class Webhook: BaseHandler() {
                     .fromJson(event.dataObjectDeserializer.rawJson, Charge::class.java)
                 refund(chargeRefund)
             }
-            event.type?.contentEquals("invoice.finalized") == true -> {
+            event.type?.contentEquals("invoice.paid") == true -> {
                 val invoiceModel = Invoice.GSON.newBuilder()
                     .setLenient()
                     .create()
                     .fromJson(event.dataObjectDeserializer.rawJson, Invoice::class.java)
                 invoice(invoiceModel)
             }
+            event.type?.contentEquals("checkout.session.completed") == true -> {
+                val checkoutModel = Session.GSON.newBuilder()
+                    .setLenient()
+                    .create()
+                    .fromJson(event.dataObjectDeserializer.rawJson, Session::class.java)
+                checkoutSession(checkoutModel)
+            }
+        }
+    }
+
+    // 2 different checkout session; subscription and non-subscription
+    private fun checkoutSession(checkout: Session){
+        val subscriptionId = checkout.subscription
+        if(subscriptionId != null){
+            val firebaseUserId = checkout.clientReferenceId
+            val session = Session.retrieve(checkout.id)
+            val subscription = Subscription.retrieve(subscriptionId)
+            val product = subscription.items.data[0].plan.product
+            Firestore().saveUserPurchase(firebaseUserId, session.id,
+                Customer(subscription.startDate, subscription.currentPeriodEnd,
+                    "stripe", subscriptionId, product))
+        } else {
+            // Non subscription
+            val firebaseUserId = checkout.clientReferenceId
+            val charge = Charge.list(ChargeListParams.builder().setCustomer(checkout.customer).build()).data[0]
+            val endDate = LocalDateTime.now().plusMonths(6).toEpochSecond(ZoneOffset.UTC)
+            Firestore().saveUserPurchase(firebaseUserId, charge.id,
+                Customer(charge.created, endDate, "stripe", "", "ONE_TIME"))
         }
     }
 
@@ -102,7 +132,8 @@ class Webhook: BaseHandler() {
     }
 
     private fun refund(charge: Charge){
-        val firebaseId = FirebaseAuth.getInstance().getUserByEmail(charge.receiptEmail).uid
+        val firebaseUser = FirebaseAuth.getInstance().getUserByEmail(charge.receiptEmail)
+        val firebaseId = firebaseUser.uid
         Firestore().refundUser(firebaseId, charge.id)
     }
 }

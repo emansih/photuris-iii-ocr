@@ -16,13 +16,12 @@
  *
  */
 
-package network
+package data
 
 import Constants
 import com.azure.ai.formrecognizer.FormRecognizerClientBuilder
 import com.azure.ai.formrecognizer.models.RecognizedForm
 import com.azure.core.credential.AzureKeyCredential
-import java.io.InputStream
 
 class Microsoft {
 

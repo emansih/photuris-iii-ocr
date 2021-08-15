@@ -16,20 +16,22 @@
  *
  */
 
-package network
+package data
 
 import CustomerNotFoundException
 import com.stripe.model.*
-import com.stripe.model.billingportal.Session
+import com.stripe.model.checkout.Session
+import com.stripe.model.billingportal.Session as BillPortalSession
 import com.stripe.net.RequestOptions
 import com.stripe.param.*
 import com.stripe.param.billingportal.SessionCreateParams
+import com.stripe.param.checkout.SessionCreateParams as CheckoutSession
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlin.jvm.Throws
 
-class StripeUtils {
+class PaymentGateway {
 
     fun createCustomer(email: String, name: String): Customer{
         return Customer.create(
@@ -79,7 +81,69 @@ class StripeUtils {
     fun createCustomerPortal(customerId: String): String{
         val params = SessionCreateParams.builder()
             .setCustomer(customerId)
-            .setReturnUrl("fireflyocr://home")
+            .setReturnUrl("https://www.google.com")
+            .build()
+        val session = BillPortalSession.create(params)
+        return session.url
+    }
+
+
+    fun createSubscriptionCheckoutPage(customerId: String, currency: String,
+                                       amount: Double, firebaseId: String): String{
+        val paymentMethodTypeList = arrayListOf(CheckoutSession.PaymentMethodType.CARD)
+        val params = CheckoutSession.builder()
+            .addAllPaymentMethodType(paymentMethodTypeList)
+            .setMode(CheckoutSession.Mode.SUBSCRIPTION)
+            .setCustomer(customerId)
+            .setClientReferenceId(firebaseId)
+            .setSuccessUrl("https://example.com/success")
+            .setCancelUrl("https://example.com/cancel")
+            .addLineItem(CheckoutSession.LineItem.Builder()
+                .setQuantity(1L)
+                .setPrice(createProduct(customerId + "_product", currency, amount, 6))
+                .build())
+            .build()
+        val session = Session.create(params)
+        return session.url
+    }
+
+    fun createCheckoutPage(customerId: String, currency: String,
+                           amount: Double, firebaseId: String): String{
+        val paymentMethodTypeList = arrayListOf(CheckoutSession.PaymentMethodType.CARD)
+        if(currency.contentEquals("EUR")){
+            paymentMethodTypeList.add(CheckoutSession.PaymentMethodType.P24)
+            paymentMethodTypeList.add(CheckoutSession.PaymentMethodType.BANCONTACT)
+            paymentMethodTypeList.add(CheckoutSession.PaymentMethodType.GIROPAY)
+            paymentMethodTypeList.add(CheckoutSession.PaymentMethodType.IDEAL)
+            paymentMethodTypeList.add(CheckoutSession.PaymentMethodType.EPS)
+        }
+        if(currency.contentEquals("SGD") || currency.contentEquals("MYR")){
+            paymentMethodTypeList.add(CheckoutSession.PaymentMethodType.GRABPAY)
+        }
+        if (currency.contentEquals("CNY") || currency.contentEquals("SGD")){
+            paymentMethodTypeList.add(CheckoutSession.PaymentMethodType.ALIPAY)
+        }
+
+        val params = CheckoutSession.builder()
+            .addAllPaymentMethodType(paymentMethodTypeList)
+            .setMode(CheckoutSession.Mode.PAYMENT)
+            .setCustomer(customerId)
+            .setClientReferenceId(firebaseId)
+            .setSuccessUrl("https://example.com/success")
+            .setCancelUrl("https://example.com/cancel")
+            .addLineItem(
+                CheckoutSession.LineItem.builder()
+                    .setQuantity(1L)
+                    .setPriceData(
+                        CheckoutSession.LineItem.PriceData.builder()
+                            .setCurrency(currency)
+                            .setUnitAmount(getAmount(amount, currency))
+                            .setProductData(
+                                CheckoutSession.LineItem.PriceData.ProductData.builder()
+                                    .setName("Photuris III OCR")
+                                    .build())
+                            .build())
+                    .build())
             .build()
         val session = Session.create(params)
         return session.url
@@ -98,7 +162,7 @@ class StripeUtils {
                 .setProductData(PriceCreateParams.ProductData
                     .builder()
                     .setName("Photuris III OCR")
-                    .setStatementDescriptor("Photuris III OCR")
+                    .setStatementDescriptor("OCR Subscription")
                     .build())
                 .setProduct(name)
                 .setUnitAmount(getAmount(amount, currencyCode))

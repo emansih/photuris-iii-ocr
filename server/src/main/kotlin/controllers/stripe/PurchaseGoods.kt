@@ -19,7 +19,7 @@
 package controllers.stripe
 
 import CustomerNotFoundException
-import network.StripeUtils
+import data.PaymentGateway
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserRecord
 import controllers.BaseHandler
@@ -33,7 +33,7 @@ import utils.isGoodSchool
 
 class PurchaseGoods: BaseHandler() {
 
-    private val stripeUtils by lazy { StripeUtils() }
+    private val stripeUtils by lazy { PaymentGateway() }
 
     override fun handle(context: Context) {
         val ipAddress = context.ip()

@@ -19,7 +19,7 @@
 package controllers.stripe
 
 import CustomerNotFoundException
-import network.StripeUtils
+import data.PaymentGateway
 import com.google.firebase.auth.FirebaseAuth
 import controllers.BaseHandler
 import data.Firestore
@@ -38,13 +38,13 @@ class CreateEphemeralKey: BaseHandler() {
                 val firebaseDisplayName = firebaseUser.displayName
                 var customerId: String? = null
                 try {
-                    val customerDetails = StripeUtils().getCustomerByEmail(firebaseUser.email)
+                    val customerDetails = PaymentGateway().getCustomerByEmail(firebaseUser.email)
                     customerId = customerDetails.id
                 } catch (exception: CustomerNotFoundException){
                     if(firebaseDisplayName.isEmpty() || firebaseEmail.isEmpty()){
                         context.status(400).json("More information required")
                     } else {
-                        val customerDetails = StripeUtils().createCustomer(firebaseUser.email, firebaseUser.displayName)
+                        val customerDetails = PaymentGateway().createCustomer(firebaseUser.email, firebaseUser.displayName)
                         customerId = customerDetails.id
                     }
                 }
@@ -54,7 +54,7 @@ class CreateEphemeralKey: BaseHandler() {
                         if(getUserSubscription.isUserSubscribed()){
                             context.status(400).json("You are subscribed already")
                         } else {
-                            val key = StripeUtils().createEphemeralKey(customerId, stripeApiVersion)
+                            val key = PaymentGateway().createEphemeralKey(customerId, stripeApiVersion)
                             context.status(200).json(key.rawJson)
                         }
                     } else {
