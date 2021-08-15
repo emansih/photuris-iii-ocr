@@ -41,11 +41,11 @@ class GetUserStatus: Handler {
                 val localTime = Instant.now().toEpochMilli()
                 val userTimeStamp = firebaseUser.userMetadata.creationTimestamp
                 val timeDifference = localTime.minus(userTimeStamp)
-                /* User created within last 11 seconds
+                /* User created within last 5 seconds
                  * Ideally, we should be using Firebase Functions but it requires me to
                  * use a credit card :(
                  */
-                val customer = if(timeDifference <= 11000L){
+                val customer = if(timeDifference <= 5000L){
                     // New user
                     freeTrial(firebaseId)
                 } else {
@@ -57,13 +57,18 @@ class GetUserStatus: Handler {
     }
 
     private fun freeTrial(firebaseUserId: String): Customer{
-        val randomString = UUID.randomUUID().toString().dropLast(10)
-        val timeNow = Instant.now().epochSecond
-        // 1 week = 604800 seconds
-        val trialEnds = timeNow.plus(604800)
-        val customer = Customer(timeNow, trialEnds, "Free Trial", "", "FREE TRIAL")
-        Firestore().saveUserPurchase(firebaseUserId, randomString,customer)
-        return customer
+        val userHistory = Firestore().getUserPurchaseHistory(firebaseUserId)
+        if(userHistory.isEmpty()){
+            val randomString = UUID.randomUUID().toString().dropLast(10)
+            val timeNow = Instant.now().epochSecond
+            // 1 week = 604800 seconds
+            val trialEnds = timeNow.plus(604800)
+            val customer = Customer(timeNow, trialEnds, "Free Trial", "", "FREE TRIAL")
+            Firestore().saveUserPurchase(firebaseUserId, randomString,customer)
+            return customer
+        } else {
+            return userHistory[0].customer
+        }
     }
 
 
