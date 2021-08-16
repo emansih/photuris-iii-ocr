@@ -127,7 +127,9 @@ class ReceiptParser: BaseHandler() {
             context.status(200).json(ReceiptData(merchantName, transactionDate, transactionTime, totalPrice)
             )
         } catch (exception: Exception) {
-            exception.printStackTrace()
+            if(Constants.IS_DEBUG){
+                exception.printStackTrace()
+            }
         } finally {
             blob.delete()
         }

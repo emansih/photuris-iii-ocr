@@ -47,7 +47,9 @@ fun main(){
 		throw Exception("Storage Bucket URL not found!")
 	}
     val app = Javalin.create{ obj: JavalinConfig ->
-        obj.enableDevLogging()
+        if(Constants.IS_DEBUG){
+            obj.enableDevLogging()
+        }
         obj.addStaticFiles("/css", Location.CLASSPATH)
         obj.showJavalinBanner = false
     }.start(8181)
@@ -56,7 +58,9 @@ fun main(){
         GoogleExtension.getFirebaseCredentials()
         System.setProperty("pdfbox.fontcache", "/tmp")
     } catch (exception: Exception){
-        exception.printStackTrace()
+        if(Constants.IS_DEBUG) {
+            exception.printStackTrace()
+        }
     }
 
 }

@@ -49,7 +49,9 @@ class Webhook: BaseHandler() {
                 event(event)
                 context.status(200)
             } catch (exception: Exception){
-                exception.printStackTrace()
+                if(Constants.IS_DEBUG){
+                    exception.printStackTrace()
+                }
             }
 
         }

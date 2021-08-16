@@ -119,7 +119,9 @@ class Webhook: BaseHandler()  {
             }
 
         } catch (exception: Exception){
-            exception.printStackTrace()
+            if(Constants.IS_DEBUG) {
+                exception.printStackTrace()
+            }
         }
     }
 }
