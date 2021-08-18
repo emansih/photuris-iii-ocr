@@ -24,12 +24,15 @@ import org.apache.pdfbox.rendering.PDFRenderer
 import org.apache.pdfbox.tools.imageio.ImageIOUtil
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.util.*
+import javax.imageio.ImageIO
 import kotlin.math.max
 
 class FileUtils {
 
-    fun convertPdfToImage(inputStream: InputStream, fileName: String){
+    fun convertPdfToImage(inputStream: InputStream, fileName: String): ByteArray {
         val document = PDDocument.load(inputStream)
         val pdfRenderer = PDFRenderer(document)
         var joinBufferedImage = BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
@@ -37,8 +40,10 @@ class FileUtils {
             val bImage = pdfRenderer.renderImageWithDPI(page, 300f, ImageType.RGB)
             joinBufferedImage = joinBufferedImage(joinBufferedImage, bImage)
         }
-        ImageIOUtil.writeImage(joinBufferedImage, fileName + ".png", 300);
+        val byteOutputStream = ByteArrayOutputStream()
+        ImageIO.write(joinBufferedImage, "png", byteOutputStream)
         document.close()
+        return byteOutputStream.toByteArray()
     }
 
     // https://stackoverflow.com/a/58031443

@@ -44,7 +44,7 @@ class ReceiptParser: BaseHandler() {
     private var merchantName: String? = ""
     private var transactionDate: String? = ""
     private var transactionTime: String? = ""
-    private lateinit var blob: Blob
+    private var blob: Blob? = null
 
     override fun handle(context: Context) {
         val uploadFile = context.uploadedFile("file")
@@ -61,11 +61,9 @@ class ReceiptParser: BaseHandler() {
             val getUserSubscription = Firestore().getUserSubscription(firebaseId).customer
             if(getUserSubscription.isUserSubscribed()){
                 if(uploadFile.extension.isPdf()){
-                    FileUtils().convertPdfToImage(uploadFile.content, uploadFile.filename)
-                    blob = StorageClient.getInstance().bucket()
-                        .create("customer/" + firebaseId + "/" + uploadFile.filename,
-                            Files.readAllBytes(Paths.get(uploadFile.filename + ".png")))
-                    File(uploadFile.filename + ".png").delete()
+                    val receiptFile = FileUtils().convertPdfToImage(uploadFile.content,
+                        uploadFile.filename)
+                    blob = StorageClient.getInstance().bucket().create("customer/" + firebaseId + "/" + uploadFile.filename, receiptFile)
                 } else if(uploadFile.extension.isImage()){
                     blob = StorageClient.getInstance().bucket()
                         .create("customer/" + firebaseId + "/" + uploadFile.filename,
@@ -73,7 +71,10 @@ class ReceiptParser: BaseHandler() {
                 } else {
                     context.status(400)
                 }
-                getImageData(blob, context)
+                val bblob = blob
+                if(bblob != null){
+                    getImageData(bblob, context)
+                }
             } else {
                 context.status(400)
             }
