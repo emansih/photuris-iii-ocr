@@ -16,9 +16,12 @@
  *
  */
 
+import com.paypal.core.PayPalEnvironment
 import com.stripe.Stripe
 import controllers.*
+import controllers.paypal.ConfirmOrder
 import controllers.stripe.*
+import controllers.paypal.PurchaseGoods as PaypalPurchaseGoods
 import controllers.stripe.Webhook as StripeWebhook
 import controllers.google.Webhook as GoogleWebhook
 import io.javalin.Javalin
@@ -47,6 +50,7 @@ fun main(){
 		throw Exception("Storage Bucket URL not found!")
 	}
     val app = Javalin.create{ obj: JavalinConfig ->
+        obj.enableDevLogging()
         if(Constants.IS_DEBUG){
             obj.enableDevLogging()
         }
@@ -80,6 +84,15 @@ private fun configureRoutes(app: Javalin) {
     app.post("/api/v1/stripe/purchase", PurchaseGoods())
     app.post("/api/v1/stripe/hosted_page", HostedWebpage())
     app.get("/stripe/thankyou", PurchaseSuccessController())
+
+    val payPalEnvironment = if(Constants.IS_DEBUG){
+        PayPalEnvironment.Sandbox(Constants.PAYPAL_CLIENT_ID, Constants.PAYPAL_CLIENT_SECRET)
+    } else {
+        PayPalEnvironment.Live(Constants.PAYPAL_CLIENT_ID, Constants.PAYPAL_CLIENT_SECRET)
+    }
+
+    app.post("/api/v1/paypal/createOrder", PaypalPurchaseGoods(payPalEnvironment))
+    app.post("/api/v1/paypal/confirmOrder", ConfirmOrder(payPalEnvironment))
 
     app.post("/api/v1/google/webhook", GoogleWebhook())
 

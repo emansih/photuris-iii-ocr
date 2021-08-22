@@ -54,6 +54,9 @@ class HistoryRecyclerView(private val historyItems: List<CustomerPurchases>,
             } else if(customerPurchases.customer.paymentSource.contentEquals("stripe")){
                 paymentSource = "stripe"
                 "Purchased from: Stripe"
+            } else if(customerPurchases.customer.paymentSource.contentEquals("paypal")){
+                paymentSource = "paypal"
+                "Purchased from: Paypal"
             } else {
                 paymentSource = "freeTrial"
                 "Free Trial"

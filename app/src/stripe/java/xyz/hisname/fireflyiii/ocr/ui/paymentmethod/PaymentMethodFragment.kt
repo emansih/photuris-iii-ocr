@@ -37,6 +37,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.paypal.checkout.PayPalCheckout
+import com.paypal.checkout.approve.OnApprove
+import com.paypal.checkout.config.CheckoutConfig
+import com.paypal.checkout.config.Environment
+import com.paypal.checkout.createorder.CreateOrder
+import com.paypal.checkout.createorder.OrderIntent
+import com.paypal.checkout.error.OnError
+import com.paypal.checkout.order.Order
 import com.stripe.android.*
 import com.stripe.android.model.*
 import xyz.hisname.fireflyiii.ocr.BuildConfig
@@ -85,8 +93,6 @@ class PaymentMethodFragment: BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        PaymentConfiguration.init(requireContext(),BuildConfig.STRIPE_PUBLISHABLE_KEY)
-
         binding.cardRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.cardRecyclerView.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
         val paymentMethodArray = arrayListOf(
@@ -97,6 +103,8 @@ class PaymentMethodFragment: BottomSheetDialogFragment() {
                 paymentMethodArray.add(PaymentModel("Alipay",
                     ContextCompat.getDrawable(requireContext(), R.drawable.alipay), 1))
             }
+            paymentMethodArray.add(PaymentModel("Paypal",
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_paypal), 9))
         }
 
         if(currencyCode.contentEquals("EUR") && !isRecurring){
@@ -130,7 +138,7 @@ class PaymentMethodFragment: BottomSheetDialogFragment() {
             toast(message)
         }
         paymentMethodArray.add(PaymentModel("Pay via Web Browser",
-            ContextCompat.getDrawable(requireContext(), R.drawable.ic_credit_card), 8))
+            ContextCompat.getDrawable(requireContext(), R.drawable.ic_web_browser), 8))
     }
 
     private fun getUserData(cardId: Long){
@@ -170,24 +178,66 @@ class PaymentMethodFragment: BottomSheetDialogFragment() {
     }
 
     private fun itemClicked(cardId: Long, email: String, name: String) {
-        paymentViewModel.createCustomerSession().observe(viewLifecycleOwner) { isSuccessful ->
-            if(isSuccessful){
-                when (cardId) {
-                    0L -> { creditCard() }
-                    1L -> { aliPay() }
-                    2L -> { grabPay(email, name) }
-                    3L -> { p24(name, email) }
-                    4L -> { banConnect(name, email) }
-                    5L -> { giroPay(name, email) }
-                    6L -> { idealPayment(name, email) }
-                    7L -> { epsPayment(name, email) }
-                    8L -> { webBrowser() }
-                }
+        if(cardId == 9L){
+            val environment = if(BuildConfig.DEBUG){
+                Environment.SANDBOX
             } else {
-                toast("There was an issue setting up payment")
-                dismiss()
+                Environment.LIVE
+            }
+            val config = CheckoutConfig(
+                requireActivity().application,
+                BuildConfig.PAYPAL_CLIENT_ID,
+                environment,
+                BuildConfig.APPLICATION_ID + "://paypalpay"
+            )
+            PayPalCheckout.setConfig(config)
+            paypal()
+        } else {
+            PaymentConfiguration.init(requireContext(),BuildConfig.STRIPE_PUBLISHABLE_KEY)
+            paymentViewModel.createCustomerSession().observe(viewLifecycleOwner) { isSuccessful ->
+                if(isSuccessful){
+                    when (cardId) {
+                        0L -> { creditCard() }
+                        1L -> { aliPay() }
+                        2L -> { grabPay(email, name) }
+                        3L -> { p24(name, email) }
+                        4L -> { banConnect(name, email) }
+                        5L -> { giroPay(name, email) }
+                        6L -> { idealPayment(name, email) }
+                        7L -> { epsPayment(name, email) }
+                        8L -> { webBrowser() }
+                    }
+                } else {
+                    toast("There was an issue setting up payment")
+                    dismiss()
+                }
             }
         }
+
+    }
+
+    private fun paypal(){
+        binding.payPalButton.setup(
+            createOrder = CreateOrder {  createOrderActions ->
+                paymentViewModel.getOrderId(currencyCode).observe(viewLifecycleOwner){ orderId ->
+                    createOrderActions.set(orderId)
+                }
+            },
+            onApprove = OnApprove { approval ->
+                paymentViewModel.submitOrderId(approval.data.orderId).observe(viewLifecycleOwner){ success ->
+                    if(success){
+                        dismiss()
+                        parentFragmentManager.popBackStack()
+                        toast("Thank you! Payment Succeeded")
+                    }
+                }
+            },
+            onError = OnError.invoke {  errorInfo ->
+                errorInfo.error.printStackTrace()
+                toast(errorInfo.reason, Toast.LENGTH_LONG)
+            }
+        )
+        binding.payPalButton.callOnClick()
     }
 
     private fun webBrowser(){

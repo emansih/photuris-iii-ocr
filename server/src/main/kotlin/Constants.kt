@@ -24,7 +24,9 @@ class Constants private constructor() {
         val STORAGE_BUCKET: String? = System.getenv("STORAGE_BUCKET")
 		val STRIPE_WEB_HOOK_KEY: String? = System.getenv("STRIPE_WEB_HOOK_KEY")
         val APP_URL: String? = System.getenv("APP_URL")
-        val IS_DEBUG: Boolean = System.getenv("").toBoolean()
+        val IS_DEBUG: Boolean = System.getenv("IS_DEBUG").toBoolean()
+        val PAYPAL_CLIENT_ID: String? = System.getenv("PAYPAL_CLIENT_ID")
+        val PAYPAL_CLIENT_SECRET: String? = System.getenv("PAYPAL_CLIENT_SECRET")
         const val PACKAGE_NAME = "xyz.hisname.fireflyiii.ocr"
         const val TEST_EMAIL = "RandomEmail@gmail.com"
         const val TEST_FIREBASE_ID = "some_random_id"

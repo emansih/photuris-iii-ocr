@@ -37,10 +37,37 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.paypal.openid.RedirectUriReceiverActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/PYPLAppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="paypalpay"
+                    android:scheme="xyz.hisname.fireflyiii.ocr" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.paypal.pyplcheckout.home.view.activities.PYPLInitiateCheckoutActivity"
+            android:theme="@style/AppFullScreenTheme">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="paypalxo"
+                    android:scheme="xyz.hisname.fireflyiii.ocr" />
+            </intent-filter>
+        </activity>
+
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="text" />
-
 
         <provider
             android:authorities="${applicationId}.provider"

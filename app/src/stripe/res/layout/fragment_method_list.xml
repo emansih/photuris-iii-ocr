@@ -34,6 +34,15 @@
         android:id="@+id/progressLayout"
         layout="@layout/progress_overlay"/>
 
+    <com.paypal.checkout.paymentbutton.PayPalButton
+        android:id="@+id/payPalButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
     <ImageView
         android:id="@+id/stripeFooter"
         android:layout_width="match_parent"

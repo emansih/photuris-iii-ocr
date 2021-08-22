@@ -22,10 +22,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField("String", "SERVER_URL", '"https://photurisiii-ocr.hisname.xyz"')
+            buildConfigField("String", "PAYPAL_CLIENT_ID", "AWna_t1mILDLBG4EVtlZ8dnKFnGrfurQMr1aXBtMDTFc1w2cmvMr5xevGBCIVy7L-FUcx_pkmJQizBYV")
             buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", '"pk_live_51IAAvPEhoYdXR4dI0YleUV5eDAZe3r8g21o2yK4PaiepbZPqYCl3FA1e6QGXvqNuIwsnreAfJNy98MFPnb85x3Tb00zXtFc80R"')
 		}
         debug {
             buildConfigField("String", "SERVER_URL", '"http://192.168.2.203:8181"')
+            buildConfigField("String", "PAYPAL_CLIENT_ID", '"ATsm4gRnr_Wt30uqZJu9RyHp1jC531gSQXdth78Tq1POMr8YF_3bCwzYHkNBwErk78Mfw19_mOBOFXu0"')
             buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", '"pk_test_51IAAvPEhoYdXR4dITZEpLuvn35zKClUWVbZN74yjrceC9dZGwocoLdzClk1nJbVLtCLdGFC8nR7exsvgi091vwRo00UtuXxjUO"')
         }
         compileOptions {
@@ -89,6 +91,7 @@ dependencies {
 
     stripeImplementation 'com.stripe:stripe-android:17.1.0'
     stripeImplementation(name: 'alipaySdk-15.7.4-20200228192259', ext: 'aar')
+    stripeImplementation('com.paypal.checkout:android-sdk:0.2.0')
 
     def camerax_version = "1.1.0-alpha07"
     implementation "androidx.camera:camera-camera2:$camerax_version"

@@ -25,6 +25,7 @@ import com.stripe.android.CustomerSession
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import xyz.hisname.fireflyiii.ocr.network.PaypalEndpoints
 import xyz.hisname.fireflyiii.ocr.network.StripeEndpoints
 import xyz.hisname.fireflyiii.ocr.ui.BaseViewModel
 import java.util.concurrent.TimeUnit
@@ -32,7 +33,9 @@ import java.util.concurrent.TimeUnit
 class PaymentMethodViewModel(application: Application): BaseViewModel(application) {
 
     private val stripeEndpoint by lazy { networkService.create(StripeEndpoints::class.java) }
+    private val paypalEndpoint by lazy { networkService.create(PaypalEndpoints::class.java) }
     private var clientKey = ""
+    private var orderId = ""
 
     fun getSubscriptionEnd(): LiveData<Boolean>{
         val isUserSubscribed = MutableLiveData<Boolean>()
@@ -120,6 +123,48 @@ class PaymentMethodViewModel(application: Application): BaseViewModel(applicatio
             isLoading.postValue(false)
         }
         return webpageUrl
+    }
+
+    fun getOrderId(currencyCode: String): LiveData<String>{
+        val orderIdLiveData = MutableLiveData<String>()
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { coroutineContext, throwable ->
+            isLoading.postValue(false)
+        }){
+            isLoading.postValue(true)
+            // Request order ID once. Reduce load on my server
+            if(orderId.isBlank()){
+                val serverResponse = paypalEndpoint.getOrderId(currencyCode)
+                val body = serverResponse.body()
+                if(serverResponse.isSuccessful && body != null){
+                    orderId = body
+                    orderIdLiveData.postValue(body.toString())
+                } else {
+                    httpMessage.postValue("Failed to process your payment")
+                }
+            }
+            isLoading.postValue(false)
+        }
+        return orderIdLiveData
+    }
+
+    fun submitOrderId(orderId: String): LiveData<Boolean>{
+        val isSuccessful = MutableLiveData<Boolean>()
+        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { coroutineContext, throwable ->
+            isLoading.postValue(false)
+        }){
+            isLoading.postValue(true)
+            val serverResponse = paypalEndpoint.submitOrderId(orderId)
+            val body = serverResponse.body()
+            if(serverResponse.isSuccessful && body != null){
+                appPref.endTime = body.endTime
+                appPref.startTime = body.startTime
+                appPref.paymentSource = body.paymentSource
+            } else {
+                httpMessage.postValue("Failed to process your payment")
+            }
+            isLoading.postValue(false)
+        }
+        return isSuccessful
     }
 
     fun createCustomerSession(): LiveData<Boolean> {
