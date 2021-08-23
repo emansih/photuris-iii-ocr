@@ -21,6 +21,7 @@ import com.stripe.Stripe
 import controllers.*
 import controllers.paypal.ConfirmOrder
 import controllers.stripe.*
+import io.github.bucket4j.Bucket
 import controllers.paypal.PurchaseGoods as PaypalPurchaseGoods
 import controllers.stripe.Webhook as StripeWebhook
 import controllers.google.Webhook as GoogleWebhook
@@ -28,8 +29,11 @@ import io.javalin.Javalin
 import io.javalin.core.JavalinConfig
 import io.javalin.http.staticfiles.Location
 import utils.GoogleExtension
+import java.util.concurrent.ConcurrentHashMap
 
 class App
+
+private val cache: ConcurrentHashMap<String, Bucket> = ConcurrentHashMap()
 
 fun main(){
     if(Constants.STRIPE_SECRET_KEY.isNullOrBlank()){
@@ -69,7 +73,6 @@ fun main(){
 
 }
 
-
 private fun configureRoutes(app: Javalin) {
     app.get("/privacy", PrivacyController())
     app.get("/tos", TosController())
@@ -81,7 +84,7 @@ private fun configureRoutes(app: Javalin) {
     app.post("/api/v1/price", GetPriceController())
     app.post("/api/v1/stripe/createKey", CreateEphemeralKey())
     app.post("/api/v1/stripe/webhook", StripeWebhook())
-    app.post("/api/v1/stripe/purchase", PurchaseGoods())
+    app.post("/api/v1/stripe/purchase", PurchaseGoods(cache))
     app.post("/api/v1/stripe/hosted_page", HostedWebpage())
     app.get("/stripe/thankyou", PurchaseSuccessController())
 

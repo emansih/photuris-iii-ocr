@@ -24,14 +24,20 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserRecord
 import controllers.BaseHandler
 import data.Firestore
+import io.github.bucket4j.Bandwidth
+import io.github.bucket4j.Bucket
+import io.github.bucket4j.Bucket4j
+import io.github.bucket4j.Refill
 import io.javalin.http.Context
 import models.HttpResponse
 import utils.GeoLite
 import utils.findSchoolNames
 import utils.isAcademic
 import utils.isGoodSchool
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 
-class PurchaseGoods: BaseHandler() {
+class PurchaseGoods(private val concurrentHashMap: ConcurrentHashMap<String, Bucket>): BaseHandler() {
 
     private val stripeUtils by lazy { PaymentGateway() }
 
@@ -62,12 +68,20 @@ class PurchaseGoods: BaseHandler() {
                     }
                     if(customerId != null){
                         if(paymentMethodType.isBlank()){
-                            // Credit Card
-                            if(isRecurring){
-                                recurringSubscription(ipAddress, firebaseUser, currencyCode,
-                                    customerId, paymentMethod, context)
+                            // User can attempt to purchase 8 times at most per min - 1 request every 7.5 seconds
+                            // This prevents card testing
+                            val bucket = concurrentHashMap.computeIfAbsent(firebaseId, this::newBucket)
+                            val probe = bucket.tryConsumeAndReturnRemaining(1)
+                            if(probe.isConsumed){
+                                // Credit Card
+                                if(isRecurring){
+                                    recurringSubscription(ipAddress, firebaseUser, currencyCode,
+                                        customerId, paymentMethod, context)
+                                } else {
+                                    purchase(firebaseUser, currencyCode, customerId, paymentMethod, ipAddress, context)
+                                }
                             } else {
-                                purchase(firebaseUser, currencyCode, customerId, paymentMethod, ipAddress, context)
+                                context.status(400).json(HttpResponse("You are being rate limited"))
                             }
                         } else {
                             // Alipay, GrabPay, Giropay, Ban Contact, iDEAL, Przelewy24, EPS
@@ -139,5 +153,11 @@ class PurchaseGoods: BaseHandler() {
             return price.times(50).div(100)
         }
         return price
+    }
+
+    private fun newBucket(firebaseId: String): Bucket{
+        val refill = Refill.intervally(8, Duration.ofMinutes(1))
+        val limit = Bandwidth.classic(8, refill).withId(firebaseId + "-CARD_TESTING")
+        return Bucket4j.builder().addLimit(limit).build()
     }
 }

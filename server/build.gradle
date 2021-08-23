@@ -34,8 +34,9 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1'
 
     implementation "com.stripe:stripe-java:20.68.0"
-
     implementation "com.paypal.sdk:checkout-sdk:1.0.4"
+
+    implementation 'com.github.vladimir-bukhtoyarov:bucket4j-core:6.2.0'
 
     implementation "com.google.api-client:google-api-client:1.32.1"
     implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev142-1.25.0'
